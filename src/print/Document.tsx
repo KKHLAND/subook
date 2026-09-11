@@ -76,8 +76,3 @@ function Item({ page, layout }: { page: RenderPage; layout: ReturnType<typeof us
   }
 }
 
-/** 미리보기·인쇄에서 공통으로 쓰는 페이지 개수 (표지 포함) */
-export function usePageCount(): number {
-  const generated = useDoc((s) => s.generated)
-  return paginate(generated).filter((p) => !p.excluded).length + 1
-}

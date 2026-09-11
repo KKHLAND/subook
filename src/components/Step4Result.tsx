@@ -16,12 +16,12 @@ export default function Step4Result() {
   const total = visible.length + 1
   const excludedCount = all.length - visible.length
 
-  const [page, setPage] = useState(0)
+  const [wantedPage, setPage] = useState(0)
   const [scale, setScale] = useState(0.62)
 
-  useEffect(() => {
-    if (page > total - 1) setPage(Math.max(0, total - 1))
-  }, [total, page])
+  // 인쇄에서 페이지를 빼면 전체 장수가 줄어든다. 보고 있던 쪽 번호가 넘칠 수 있으므로
+  // 그릴 때 맞춰 준다 (effect 로 되돌리면 한 번 더 그려진다)
+  const page = Math.min(wantedPage, Math.max(0, total - 1))
 
   // 화면 높이에 맞춰 미리보기 축소율을 잡는다
   useEffect(() => {

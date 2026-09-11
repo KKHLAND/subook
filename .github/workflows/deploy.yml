@@ -32,6 +32,9 @@ jobs:
       - name: 타입 검사
         run: npm run check
 
+      - name: 코드 검사
+        run: npm run lint
+
       - name: 빌드 (단일 HTML)
         run: npm run build
 
