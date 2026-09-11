@@ -38,7 +38,7 @@ export const STUDY_SETS: StudySet[] = [
   { key: 'gist',      name: '대의 파악',   desc: '제목·요지·주제·주장 유형 변형 문제',           en: 'GIST',      color: '#2563EB', ready: true },
   { key: 'inference', name: '추론',       desc: '빈칸 추론·함축 의미·요약문 유형 변형 문제',      en: 'INFERENCE', color: '#7C3AED', ready: true },
   { key: 'structure', name: '글의 구조',   desc: '글의 순서·문장 삽입 유형 변형 문제',            en: 'STRUCTURE', color: '#DB2777', ready: true },
-  { key: 'writing',   name: '영작·서술형', desc: '조건 영작과 서술형 문항, 채점 기준표',          en: 'WRITING',   color: '#0F172A', ready: false },
+  { key: 'writing',   name: '영작·서술형', desc: '조건 영작과 서술형 문항, 모범답안과 채점 포인트', en: 'WRITING',   color: '#0F172A', ready: true },
 ]
 
 export const SET_ITEMS: Record<string, SetItem[]> = {
@@ -92,8 +92,35 @@ export const SET_ITEMS: Record<string, SetItem[]> = {
     { key: 'insertion',     label: '문장 삽입',       desc: '주어진 문장이 들어가기에 가장 적절한 곳',            weight: 3 },
     { key: 'irrelevant',    label: '무관한 문장',     desc: '전체 흐름과 관계 없는 문장 고르기',                 weight: 2 },
   ],
-  /* ── 영작·서술형 (준비 중) ── */
-  writing: [],
+  /* ── 영작·서술형 ── */
+  writing: [
+    { key: 'condition_writing',   label: '조건 영작',    desc: '주어진 어휘와 조건에 맞게 우리말을 영어 문장으로',  weight: 3 },
+    { key: 'sentence_completion', label: '문장 완성',    desc: '본문 근거를 찾아 빈칸에 들어갈 표현 직접 쓰기',     weight: 2 },
+    { key: 'summary_writing',     label: '요약문 쓰기',  desc: '지문을 영어 한 문장으로 요약하기',                weight: 3 },
+  ],
+}
+
+/**
+ * 항목이 어떤 결과물인지.
+ *   study    — 공부용 자료. 문제가 아니다 (해석·단어장 …)
+ *   question — 문제. 문제지와 해설지로 갈라서 인쇄한다
+ *   writing  — 서술형. 문제와 모범답안·채점 포인트
+ */
+export type ItemKind = 'study' | 'question' | 'writing'
+
+const QUESTION_ITEMS = new Set([
+  'title', 'main_point', 'topic', 'title_hard', 'main_hard',
+  'blank_1', 'blank_2', 'implication', 'summary',
+  'order', 'insertion', 'irrelevant',
+  'grammar_mcq', 'vocab_mcq',
+])
+
+const WRITING_ITEMS = new Set(['condition_writing', 'sentence_completion', 'summary_writing'])
+
+export function kindOf(itemKey: string): ItemKind {
+  if (QUESTION_ITEMS.has(itemKey)) return 'question'
+  if (WRITING_ITEMS.has(itemKey)) return 'writing'
+  return 'study'
 }
 
 /** 세트 + 지문 형태로 항목 목록 얻기 (분석 세트만 short/long 분기) */

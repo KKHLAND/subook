@@ -3,6 +3,7 @@ import { PROMPTS, SYSTEM } from './prompts'
 import { SCHEMAS } from './schemas'
 import type { VocabListData } from './types'
 import { splitSentences } from '../lib/segment'
+import { SET_ITEMS } from '../lib/sets'
 import type { GeneratedPage, Question } from '../store/useDoc'
 
 /** 무료 티어 분당 호출 한도에 맞춘 최소 간격(ms) */
@@ -152,15 +153,10 @@ function sleep(ms: number, signal: AbortSignal): Promise<void> {
 
 /* ── 보조 ───────────────────────────────────────────────── */
 
-const LABELS: Record<string, string> = {
-  translation: '지문 해석',
-  key_guide: '핵심 가이드',
-  sentence_read: '한 문장 읽기',
-  close_reading: '정밀 판독',
-  vocab_list: '단어 리스트',
-  meaning_test: '뜻쓰기 테스트',
-  spelling_test: '스펠링 테스트',
-}
+/** 항목 key → 화면에 보여 줄 이름. 세트 정의에서 그대로 끌어온다 */
+const LABELS: Record<string, string> = Object.fromEntries(
+  Object.values(SET_ITEMS).flatMap((items) => items.map((i) => [i.key, i.label])),
+)
 export const labelOf = (k: string) => LABELS[k] ?? k
 
 function makePage(itemKey: string, questionNo: number, data: unknown): GeneratedPage {

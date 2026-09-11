@@ -26,6 +26,8 @@ interface HeadProps {
   currentItem: string
   part: number
   partCount: number
+  /** 머리글 오른쪽에 덧붙일 표시. 해설지 등 */
+  note?: string
 }
 
 /** 본문 페이지 머리글 */
@@ -48,7 +50,14 @@ export function Head(p: HeadProps) {
           </span>
           <span className="text-[7pt] font-semibold tracking-[0.2em] text-slate-400">{s.en}</span>
         </div>
-        <span className="text-[8pt] font-semibold text-slate-500">수북 학습자료</span>
+        <span className="flex items-center gap-[2mm] text-[8pt] font-semibold text-slate-500">
+          {p.note && (
+            <span className="rounded-[1pt] bg-slate-800 px-[1.5mm] py-[0.3mm] text-[7pt] text-white">
+              {p.note}
+            </span>
+          )}
+          수북 학습자료
+        </span>
       </div>
 
       <div className="mt-[1.5mm] flex items-baseline justify-between gap-[4mm]">

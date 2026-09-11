@@ -1,8 +1,8 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useDoc, type LayoutMode } from '../store/useDoc'
 import { labelOf } from '../ai/runner'
-import { paginate } from '../print/pages'
 import Document from '../print/Document'
+import { usePages } from '../print/usePages'
 import BottomBar from './BottomBar'
 
 export default function Step4Result() {
@@ -11,7 +11,7 @@ export default function Step4Result() {
   const goto = useDoc((s) => s.goto)
   const resetDoc = useDoc((s) => s.resetDoc)
 
-  const all = useMemo(() => paginate(doc.generated), [doc.generated])
+  const all = usePages()
   const visible = all.filter((p) => !p.excluded)
   const total = visible.length + 1
   const excludedCount = all.length - visible.length
@@ -44,6 +44,15 @@ export default function Step4Result() {
     )
 
   const itemKeys = [...new Set(doc.generated.map((g) => g.itemKey))]
+  const hasQuestions = all.some((p) => p.role === 'question')
+
+  /** 페이지 목록에 보여 줄 이름 */
+  const nameOf = (p: (typeof all)[number]) =>
+    p.itemKey === '__answers'
+      ? `해설지 ${p.part}/${p.partCount}`
+      : p.itemKey === '__questions'
+        ? `문제지 ${p.part}/${p.partCount}`
+        : labelOf(p.itemKey)
 
   return (
     <>
@@ -142,13 +151,43 @@ export default function Step4Result() {
             </Field>
           </Card>
 
+          {hasQuestions && (
+            <Card title="문제지 · 해설지">
+              <label className="flex items-center gap-2 text-sm text-slate-700">
+                <input
+                  type="checkbox"
+                  checked={doc.includeAnswers}
+                  onChange={(e) => setDoc('includeAnswers', e.target.checked)}
+                  className="size-4 accent-[#0d8466]"
+                />
+                해설지 포함
+              </label>
+              <p className="break-keep text-xs text-slate-500">
+                해제하면 문제만 남습니다. 학생에게 나눠 줄 문제지를 먼저 뽑고, 다시 켜서 해설지를
+                뽑으면 됩니다.
+              </p>
+
+              <Field label="문제 순서">
+                <Seg
+                  value={doc.sortMode}
+                  options={[
+                    { v: 'byQuestion', l: '지문 순' },
+                    { v: 'byType', l: '유형 순' },
+                  ]}
+                  onChange={(v) => setDoc('sortMode', v as 'byQuestion' | 'byType')}
+                />
+              </Field>
+            </Card>
+          )}
+
           <Card title="항목별 인쇄">
             <p className="mb-2 break-keep text-xs text-slate-500">
               체크를 해제하면 그 항목이 인쇄에서 빠집니다. 문제지와 해설지를 따로 뽑을 때 쓰세요.
             </p>
             {itemKeys.map((k) => {
+              const madeOfItem = doc.generated.filter((g) => g.itemKey === k)
               const pagesOfItem = all.filter((p) => p.itemKey === k)
-              const on = pagesOfItem.some((p) => !p.excluded)
+              const on = madeOfItem.some((g) => !g.excluded)
               return (
                 <label
                   key={k}
@@ -161,7 +200,9 @@ export default function Step4Result() {
                     className="size-4 accent-[#0d8466]"
                   />
                   <span className="flex-1">{labelOf(k)}</span>
-                  <span className="text-xs text-slate-400">{pagesOfItem.length}장</span>
+                  <span className="text-xs text-slate-400">
+                    {pagesOfItem.length ? `${pagesOfItem.length}장` : `${madeOfItem.length}문항`}
+                  </span>
                 </label>
               )
             })}
@@ -177,17 +218,19 @@ export default function Step4Result() {
                   <input
                     type="checkbox"
                     checked={!p.excluded}
+                    // 해설지는 위의 «해설지 포함» 으로 한꺼번에 켜고 끈다
+                    disabled={p.role === 'answer'}
                     onChange={() => toggleExcluded(p.id)}
-                    className="size-3.5 accent-[#0d8466]"
+                    className="size-3.5 accent-[#0d8466] disabled:opacity-40"
                   />
                   <button
                     onClick={() => setPage(Math.min(total - 1, i + 1))}
                     className="flex-1 truncate text-left text-slate-600 hover:text-brand-700"
                   >
-                    {doc.questions.length > 1 && (
+                    {doc.questions.length > 1 && p.role !== 'answer' && (
                       <span className="text-slate-400">{p.questionNo}번 · </span>
                     )}
-                    {labelOf(p.itemKey)}
+                    {nameOf(p)}
                     {p.partCount > 1 && (
                       <span className="text-slate-400">
                         {' '}
@@ -208,7 +251,8 @@ export default function Step4Result() {
       </div>
 
       <BottomBar
-        onBack={() => goto(3)}
+        // 3단계로 돌아가면 생성이 다시 돌아 만든 자료가 지워진다. 설정으로 보낸다.
+        onBack={() => goto(2)}
         right={
           <button
             onClick={() => {

@@ -16,8 +16,9 @@ export default function Stepper() {
       {STEPS.map(({ n, label }, i) => {
         const done = n < step
         const active = n === step
-        // 생성 중(3)에는 뒤로 못 감. 이미 지난 단계로만 이동 허용.
-        const clickable = done && step !== 3
+        // 이미 지난 단계로만 이동할 수 있다.
+        // 생성(3)은 누르면 자료를 지우고 다시 만들기 때문에 언제나 막는다.
+        const clickable = done && step !== 3 && n !== 3
         return (
           <div key={n} className="flex items-center">
             {i > 0 && (

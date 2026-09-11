@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
-import { STUDY_SETS, itemsFor } from '../lib/sets'
+import { STUDY_SETS, itemsFor, setByKey } from '../lib/sets'
+import { sampleFor, SAMPLE_QUESTIONS } from '../lib/sample'
 import { segment, wordCount } from '../lib/segment'
 import { useDoc, textToAnalyze } from '../store/useDoc'
 import { useSettings, MODELS } from '../store/useSettings'
@@ -18,6 +19,7 @@ export default function Step2Config() {
   const setSetting = useSettings((s) => s.set)
 
   const items = itemsFor(setKey, shape)
+  const active = setByKey(setKey)
   const allOn = items.length > 0 && selectedItems.length === items.length
 
   const source = textToAnalyze(doc)
@@ -200,6 +202,27 @@ export default function Step2Config() {
               만들어져 시간이 들지 않습니다.
             </p>
           </div>
+
+          <button
+            onClick={() => {
+              const s = sampleFor(setKey)
+              if (!s) return
+              useDoc.setState({
+                title: s.title,
+                questions: SAMPLE_QUESTIONS,
+                generated: s.pages,
+                step: 4,
+              })
+            }}
+            className="w-full rounded-xl border border-dashed border-slate-300 p-3 text-center transition hover:border-brand-400 hover:bg-brand-50/50"
+          >
+            <span className="text-sm font-semibold text-slate-700">
+              «{active.name}» 자료 미리 보기
+            </span>
+            <span className="mt-0.5 block break-keep text-xs text-slate-500">
+              AI 연결 없이 이 자료가 어떻게 나오는지 바로 확인할 수 있습니다.
+            </span>
+          </button>
 
           <div className="rounded-xl border border-brand-200 bg-brand-50 p-4">
             <h3 className="text-[11px] font-semibold tracking-widest text-brand-700">비용</h3>

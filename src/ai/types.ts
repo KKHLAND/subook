@@ -58,6 +58,53 @@ export interface VocabListData {
   words: Word[]
 }
 
+/* ── 문제 유형 ───────────────────────────────────────────
+   제목·요지·주제·빈칸·함축·요약·순서·삽입·무관한문장·어법객관식·어휘객관식
+   — 열한 가지를 이 한 틀로 그린다. 틀이 하나라 조판을 한 번만 손보면 된다. */
+
+export interface PassagePart {
+  text: string
+  /** ①②③④⑤ 로 표시할 자리. 밑줄 문제는 이 부분에 밑줄을 긋는다 */
+  mark?: number
+}
+
+export interface QuestionData {
+  /** 문항 위에 붙는 유형 이름 (제목 / 빈칸 추론 …) */
+  type: string
+  /** 발문. "다음 글의 제목으로 가장 적절한 것은?" */
+  directive: string
+  /** 본문 앞에 따로 제시되는 글 (문장 삽입의 주어진 문장, 글 순서의 주어진 글) */
+  lead?: string
+  /** 본문 */
+  parts: PassagePart[]
+  /** 따로 떨어진 단락 — 글의 순서의 (A)(B)(C) */
+  blocks?: { label: string; text: string }[]
+  /** 본문 뒤에 제시되는 글 — 요약문 */
+  tail?: string
+  choices: string[]
+  /** 정답 번호 1~5 */
+  answer: number
+  explanation: string
+  /** 매력적인 오답이 왜 틀렸는지 */
+  wrongNotes: string[]
+}
+
+/** 문장마다 네 개 중 고르기 — 어법/어휘 4지선다 */
+export interface SentenceDrillData {
+  items: { sentence: string; choices: string[]; answer: number; note: string }[]
+}
+
+/** 문장마다 둘 중 고르기 — 어법/어휘 양자택일 */
+export interface PairDrillData {
+  items: { before: string; a: string; b: string; after: string; answer: 'A' | 'B'; note: string }[]
+}
+
+/** 영작·서술형 */
+export interface WritingData {
+  topic: string
+  items: { question: string; condition?: string; answer: string; points: string[] }[]
+}
+
 export interface ItemDataMap {
   translation: TranslationData
   key_guide: KeyGuideData

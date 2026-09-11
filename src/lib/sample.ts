@@ -188,3 +188,16 @@ export const SAMPLE_PAGES: GeneratedPage[] = [
   { id: '1-meaning_test', itemKey: 'meaning_test', questionNo: 1, data: vocabList, excluded: false },
   { id: '1-spelling_test', itemKey: 'spelling_test', questionNo: 1, data: vocabList, excluded: false },
 ]
+
+/* ── 세트별 샘플 ─────────────────────────────────────── */
+
+import { SAMPLE_BY_SET } from './sampleSets'
+import type { SetKey } from './sets'
+
+/** 세트별 샘플 자료. 미리 보기와 조판 점검에 쓴다 */
+export function sampleFor(setKey: SetKey): { title: string; pages: GeneratedPage[] } | null {
+  if (setKey === 'analysis') return { title: SAMPLE_TITLE, pages: SAMPLE_PAGES }
+  const pages = SAMPLE_BY_SET[setKey]
+  if (!pages?.length) return null
+  return { title: `샘플 — ${SAMPLE_TITLE.replace('샘플 — ', '')}`, pages }
+}

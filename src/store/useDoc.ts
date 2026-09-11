@@ -58,6 +58,10 @@ interface DocState {
   layoutMode: LayoutMode
   showBorder: boolean
   coverStyle: 'A' | 'B'
+  /** 해설지를 함께 낼지 */
+  includeAnswers: boolean
+  /** 문제 순서 */
+  sortMode: 'byQuestion' | 'byType'
   schoolName: string
   classInfo: string
 
@@ -104,6 +108,8 @@ const initial = {
   layoutMode: 'side-by-side' as LayoutMode,
   showBorder: false,
   coverStyle: 'A' as const,
+  includeAnswers: true,
+  sortMode: 'byQuestion' as const,
   schoolName: '',
   classInfo: '',
 }

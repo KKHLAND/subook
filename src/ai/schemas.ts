@@ -123,3 +123,117 @@ export const SCHEMAS: Record<string, object> = {
     propertyOrdering: ['topic', 'words'],
   },
 }
+
+/* ── 문제 유형 공통 스키마 ─────────────────────────────
+   제목·요지·주제·빈칸·함축·요약·순서·삽입·무관한문장·어법/어휘 객관식이
+   전부 이 하나를 쓴다. 유형별로 필요 없는 칸은 빈 값으로 둔다. */
+
+const QUESTION = {
+  type: 'OBJECT',
+  properties: {
+    type: S('문항 유형 이름. 예) 제목, 빈칸 추론, 글의 순서'),
+    directive: S('발문. 예) 다음 글의 제목으로 가장 적절한 것은?'),
+    lead: S('본문 앞에 따로 제시하는 글. 문장 삽입의 «주어진 문장», 글의 순서의 «주어진 글». 없으면 빈 문자열'),
+    parts: ARR({
+      type: 'OBJECT',
+      properties: {
+        text: S('본문 조각. 원문을 그대로 쓴다'),
+        mark: {
+          type: 'INTEGER',
+          description: '①②③④⑤ 로 표시할 자리면 1~5. 표시하지 않을 평범한 부분이면 0',
+        },
+      },
+      required: ['text', 'mark'],
+      propertyOrdering: ['text', 'mark'],
+    }),
+    blocks: ARR({
+      type: 'OBJECT',
+      properties: {
+        label: S('A, B, C 중 하나'),
+        text: S('그 단락의 원문'),
+      },
+      required: ['label', 'text'],
+      propertyOrdering: ['label', 'text'],
+    }),
+    tail: S('본문 뒤에 제시하는 글. 요약문 완성의 요약문. 없으면 빈 문자열'),
+    choices: ARR(S('선택지 하나. 번호(①, 1.)는 붙이지 말 것')),
+    answer: { type: 'INTEGER', description: '정답 번호 1~5' },
+    explanation: S('정답인 이유. 지문의 근거 표현을 영어 그대로 인용해 밝힌다. 2~3문장'),
+    wrongNotes: ARR(S('매력적인 오답 하나가 왜 틀렸는지. "②번: …" 처럼 번호로 시작. 2~3개')),
+  },
+  required: ['type', 'directive', 'lead', 'parts', 'blocks', 'tail', 'choices', 'answer', 'explanation', 'wrongNotes'],
+  propertyOrdering: ['type', 'directive', 'lead', 'parts', 'blocks', 'tail', 'choices', 'answer', 'explanation', 'wrongNotes'],
+}
+
+/** 문장마다 네 개 중 고르기 */
+const SENTENCE_DRILL = {
+  type: 'OBJECT',
+  properties: {
+    items: ARR({
+      type: 'OBJECT',
+      properties: {
+        sentence: S('원문 문장. 고를 자리를 정확히 "( )" 로 바꿔 둔다'),
+        choices: ARR(S('선택지 한 개. 번호는 붙이지 말 것')),
+        answer: { type: 'INTEGER', description: '정답 번호 1~4' },
+        note: S('정답 근거를 한 줄로. 우리말'),
+      },
+      required: ['sentence', 'choices', 'answer', 'note'],
+      propertyOrdering: ['sentence', 'choices', 'answer', 'note'],
+    }),
+  },
+  required: ['items'],
+}
+
+/** 문장마다 둘 중 고르기 */
+const PAIR_DRILL = {
+  type: 'OBJECT',
+  properties: {
+    items: ARR({
+      type: 'OBJECT',
+      properties: {
+        before: S('고를 자리 앞의 원문'),
+        a: S('왼쪽 선택지'),
+        b: S('오른쪽 선택지'),
+        after: S('고를 자리 뒤의 원문'),
+        answer: S('A 또는 B'),
+        note: S('정답 근거를 한 줄로. 우리말'),
+      },
+      required: ['before', 'a', 'b', 'after', 'answer', 'note'],
+      propertyOrdering: ['before', 'a', 'b', 'after', 'answer', 'note'],
+    }),
+  },
+  required: ['items'],
+}
+
+/** 영작·서술형 */
+const WRITING = {
+  type: 'OBJECT',
+  properties: {
+    topic: S('글의 주제 한 줄'),
+    items: ARR({
+      type: 'OBJECT',
+      properties: {
+        question: S('학생에게 제시할 문항. 우리말 지시 + 필요하면 우리말 문장'),
+        condition: S('조건. 예) 주어진 어휘를 모두 사용할 것 / 8단어 이내. 없으면 빈 문자열'),
+        answer: S('모범 답안 영어 문장'),
+        points: ARR(S('채점 포인트 한 줄. 예) 관계대명사 who 를 바르게 썼는가')),
+      },
+      required: ['question', 'condition', 'answer', 'points'],
+      propertyOrdering: ['question', 'condition', 'answer', 'points'],
+    }),
+  },
+  required: ['topic', 'items'],
+}
+
+// 문제 유형은 전부 같은 스키마를 쓴다
+for (const k of [
+  'title', 'main_point', 'topic', 'title_hard', 'main_hard',
+  'blank_1', 'blank_2', 'implication', 'summary',
+  'order', 'insertion', 'irrelevant',
+  'grammar_mcq', 'vocab_mcq',
+]) {
+  SCHEMAS[k] = QUESTION
+}
+for (const k of ['grammar_pick4', 'vocab_pick4']) SCHEMAS[k] = SENTENCE_DRILL
+for (const k of ['grammar_pair', 'vocab_pair']) SCHEMAS[k] = PAIR_DRILL
+for (const k of ['condition_writing', 'sentence_completion', 'summary_writing']) SCHEMAS[k] = WRITING
