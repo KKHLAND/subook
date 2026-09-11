@@ -1,0 +1,33 @@
+{
+  "name": "subook",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "check": "tsc -b",
+    "build": "node scripts/build.mjs",
+    "preview": "vite preview",
+    "lint": "oxlint"
+  },
+  "dependencies": {
+    "jszip": "^3.10.2",
+    "mammoth": "^1.12.2",
+    "pdfjs-dist": "^6.3.289",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "zustand": "^5.0.15"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.3",
+    "@types/node": "^24.13.3",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.7",
+    "@vitejs/plugin-react": "^5.2.0",
+    "oxlint": "^1.81.0",
+    "tailwindcss": "^4.3.3",
+    "typescript": "~6.0.2",
+    "vite": "^7.3.6",
+    "vite-plugin-singlefile": "^2.3.3"
+  }
+}

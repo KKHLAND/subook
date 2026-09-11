@@ -1,0 +1,50 @@
+name: 빌드 & 배포
+
+# main 에 코드를 올릴 때마다 자동으로 빌드해서 GitHub Pages 에 올린다.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: # 저장소 Actions 탭에서 수동으로도 실행할 수 있다
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 배포가 겹치지 않게 한 번에 하나만 돌린다
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: 타입 검사
+        run: npm run check
+
+      - name: 빌드 (단일 HTML)
+        run: npm run build
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
